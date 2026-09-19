@@ -1,0 +1,61 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "temporary archive inspection",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-c",
+				"import zipfile,os,tempfile,shutil,subprocess,sys\nbase=r'C:\\Users\\Vignesh\\OneDrive\\Desktop\\vigneshstepprogram\\java-gdb-activities-10\\13'\nfor fn in sorted(os.listdir(base)):\n p=os.path.join(base,fn)\n if fn.lower().endswith('.zip'):\n  print('ARCHIVE',fn)\n  with zipfile.ZipFile(p) as z:\n   names=z.namelist()\n   for n in names: print(' ',n)\n   if 'Java' not in fn: continue\n   td=os.path.join(base,'_archive_extract_temp')\n   shutil.rmtree(td,ignore_errors=True); os.makedirs(td)\n   z.extractall(td)\n   roots=[]\n   for root,ds,fs in os.walk(td):\n    if os.path.basename(root).lower()=='src' and any(f.endswith('.java') for f in fs): roots.append(root)\n   print('SRC_ROOTS',roots)\n   for src in roots:\n    label=src\n    files=[]\n    for r,ds,fs in os.walk(src): files += [os.path.join(r,f) for f in fs if f.endswith('.java')]\n    out=os.path.join(td,'classes_'+str(len(files)))\n    os.makedirs(out,exist_ok=True)\n    print('COMPILE',label,'FILES',len(files))\n    cp=subprocess.run(['javac','-d',out]+files,text=True,capture_output=True)\n    print('JAVAC_EXIT',cp.returncode)\n    if cp.stdout: print(cp.stdout)\n    if cp.stderr: print(cp.stderr)\n    if cp.returncode==0:\n     rp=subprocess.run(['java','-cp',out,'com.gdb.tests.TestAccountRulesEngine'],text=True,capture_output=True)\n     print('TEST_EXIT',rp.returncode)\n     if rp.stdout: print(rp.stdout)\n     if rp.stderr: print(rp.stderr)\n   shutil.rmtree(td,ignore_errors=True)\n"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "temporary archive inspection retry",
+			"type": "shell",
+			"command": "cmd.exe",
+			"args": [
+				"/c",
+				"python -c \"import zipfile,os,shutil,subprocess;exec(\\\"base=os.path.join(os.getcwd(),'13')\\nfor fn in sorted(os.listdir(base)):\\n p=os.path.join(base,fn)\\n if fn.lower().endswith('.zip'):\\n  print('ARCHIVE',fn)\\n  z=zipfile.ZipFile(p)\\n  print('CONTENTS')\\n  [print(' ',n) for n in z.namelist()]\\n  if 'Java' in fn:\\n   td=os.path.join(base,'_archive_extract_temp');shutil.rmtree(td,ignore_errors=True);os.makedirs(td);z.extractall(td)\\n   roots=[r for r,d,f in os.walk(td) if os.path.basename(r).lower()=='src' and any(x.endswith('.java') for x in f)]\\n   print('SRC_ROOTS',roots)\\n   for src in roots:\\n    files=[os.path.join(r,x) for r,d,f in os.walk(src) for x in f if x.endswith('.java')];out=os.path.join(td,'classes');os.makedirs(out,exist_ok=True);print('COMPILE',src,'FILES',len(files));c=subprocess.run(['javac','-d',out]+files,text=True,capture_output=True);print('JAVAC_EXIT',c.returncode);print(c.stdout,c.stderr)\\n    if c.returncode==0:\\n     t=subprocess.run(['java','-cp',out,'com.gdb.tests.TestAccountRulesEngine'],text=True,capture_output=True);print('TEST_EXIT',t.returncode);print(t.stdout,t.stderr)\\n   shutil.rmtree(td,ignore_errors=True)\\\")\""
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "run temporary archive inspection script",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"13\\_inspect_archives_temp.py"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "compile archived Java sources",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"13\\_compile_empty_java_temp.py"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "compile archived Java files concise",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"13\\_compile_archived_java_temp.py"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "compile real archived Java sources",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"13\\_compile_real_java_temp.py"
+			],
+			"problemMatcher": []
+		}
+	]
+}
